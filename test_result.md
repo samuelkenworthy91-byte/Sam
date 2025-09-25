@@ -276,11 +276,10 @@ metadata:
 
 test_plan:
   current_focus:
-    - "FastAPI server with MongoDB integration"
-    - "LLM integration for AI task analysis"
-    - "Task CRUD operations"
-    - "Daily recommendations algorithm"
     - "React app with task management UI"
+    - "Dashboard with daily recommendations"
+    - "Task creation with AI analysis display"
+    - "Task completion with time tracking"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
