@@ -96,6 +96,39 @@ function App() {
     }
   };
 
+  const bulkImportTasks = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/tasks/bulk-import`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          task_text: bulkTaskText,
+          default_priority: bulkPriority
+        }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        setBulkTaskText('');
+        await fetchTasks();
+        await fetchRecommendations();
+        alert(`Successfully imported ${result.tasks_created} tasks!`);
+      } else {
+        alert('Failed to import tasks');
+      }
+    } catch (error) {
+      console.error('Error importing tasks:', error);
+      alert('Error importing tasks');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const completeTask = async (taskId, actualHours) => {
     try {
       const response = await fetch(`${BACKEND_URL}/api/tasks/${taskId}`, {
