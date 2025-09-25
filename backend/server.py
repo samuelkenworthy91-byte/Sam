@@ -165,6 +165,195 @@ async def get_ai_task_analysis(title: str, description: str, deadline: str) -> D
         # Fallback rule-based estimation
         return rule_based_estimation(title, description, deadline)
 
+def parse_bulk_tasks(task_text: str, default_priority: str = "medium") -> List[Dict[str, Any]]:
+    """Parse bulk task input format like 'Opening Evening — 25 Sep 2025'"""
+    
+    lines = task_text.strip().split('\n')
+    tasks = []
+    
+    for line in lines:
+        line = line.strip()
+        if not line or line.lower().startswith('due') or line == '':
+            continue
+            
+        # Parse format: "Task Name — Date"
+        if '—' in line or '–' in line or '-' in line:
+            # Handle different dash types
+            separator = '—' if '—' in line else '–' if '–' in line else '-'
+            parts = line.split(separator)
+            
+            if len(parts) >= 2:
+                task_title = parts[0].strip()
+                date_str = parts[1].strip()
+                
+                # Parse date - handle formats like "25 Sep 2025", "Sep 25 2025", etc.
+                try:
+                    # Try different date formats
+                    date_formats = [
+                        "%d %b %Y",      # 25 Sep 2025
+                        "%b %d %Y",      # Sep 25 2025  
+                        "%d/%m/%Y",      # 25/09/2025
+                        "%m/%d/%Y",      # 09/25/2025
+                        "%Y-%m-%d",      # 2025-09-25
+                    ]
+                    
+                    parsed_date = None
+                    for fmt in date_formats:
+                        try:
+                            parsed_date = datetime.strptime(date_str, fmt)
+                            break
+                        except:
+                            continue
+                    
+                    if parsed_date:
+                        # Set deadline to end of day
+                        deadline = parsed_date.replace(hour=17, minute=0, second=0, microsecond=0, tzinfo=timezone.utc)
+                        
+                        # Determine complexity based on task name keywords
+                        complexity = "medium"
+                        if any(word in task_title.lower() for word in ['evening', 'event', 'ceremony', 'opening']):
+                            complexity = "large"
+                        elif any(word in task_title.lower() for word in ['morning', 'brief', 'quick', 'check']):
+                            complexity = "small"
+                        
+                        # Generate description based on task type
+                        description = f"Complete {task_title.lower()} task"
+                        if 'morning' in task_title.lower():
+                            description = f"Prepare and conduct morning session: {task_title}"
+                        elif 'evening' in task_title.lower():
+                            description = f"Organize and manage evening event: {task_title}"
+                        elif 'inset' in task_title.lower():
+                            description = f"Participate in INSET day activities: {task_title}"
+                        
+                        task_data = {
+                            "title": task_title,
+                            "description": description,
+                            "deadline": deadline.isoformat(),
+                            "priority": default_priority,
+                            "complexity": complexity
+                        }
+                        
+                        tasks.append(task_data)
+                        
+                except Exception as e:
+                    print(f"Error parsing date '{date_str}': {e}")
+                    # Fallback - set deadline to tomorrow
+                    deadline = datetime.now(timezone.utc) + timedelta(days=1)
+                    tasks.append({
+                        "title": task_title,
+                        "description": f"Complete task: {task_title}",
+                        "deadline": deadline.isoformat(),
+                        "priority": default_priority,
+                        "complexity": "medium"
+                    })
+        else:
+            # Handle lines without dates - set deadline to end of week
+            deadline = datetime.now(timezone.utc) + timedelta(days=7)
+            tasks.append({
+                "title": line,
+                "description": f"Complete task: {line}",
+                "deadline": deadline.isoformat(),
+                "priority": default_priority,
+                "complexity": "medium"
+            })
+    
+    return tasks
+
+def generate_daily_timetable(recommended_tasks: List[Dict], available_hours: float = 6.0, start_hour: int = 8) -> List[TimeSlot]:
+    """Generate a daily timetable with specific time slots"""
+    
+    if not recommended_tasks:
+        return []
+    
+    timetable = []
+    current_time = start_hour  # Start at 8 AM
+    end_time = start_hour + 8   # End at 4 PM
+    
+    # Add variety by mixing task types and adding breaks
+    mixed_tasks = []
+    
+    # Separate by complexity for better mixing
+    small_tasks = [t for t in recommended_tasks if t.get('complexity') == 'small']
+    medium_tasks = [t for t in recommended_tasks if t.get('complexity') == 'medium'] 
+    large_tasks = [t for t in recommended_tasks if t.get('complexity') == 'large']
+    
+    # Create mixed sequence: start with medium, add small between large tasks
+    task_sequence = []
+    
+    # Start with a medium task if available
+    if medium_tasks:
+        task_sequence.extend(medium_tasks[:1])
+        medium_tasks = medium_tasks[1:]
+    
+    # Alternate between large tasks and small/medium tasks
+    while large_tasks or medium_tasks or small_tasks:
+        if large_tasks:
+            task_sequence.append(large_tasks.pop(0))
+        
+        # Add a small task or medium task as breaker
+        if small_tasks:
+            task_sequence.append(small_tasks.pop(0))
+        elif medium_tasks:
+            task_sequence.append(medium_tasks.pop(0))
+    
+    # Generate time slots
+    for task in task_sequence[:8]:  # Max 8 tasks per day
+        if current_time >= end_time:
+            break
+            
+        duration = min(task['allocated_hours'], 2.0)  # Max 2 hours per slot
+        slot_end = current_time + duration
+        
+        # Add teaching break if it's around lunch time (12-1 PM)
+        if current_time < 12 and slot_end > 12:
+            # Split around lunch
+            morning_end = 12.0
+            if current_time < morning_end:
+                # Morning slot
+                timetable.append(TimeSlot(
+                    start_time=f"{int(current_time):02d}:{int((current_time % 1) * 60):02d}",
+                    end_time=f"{int(morning_end):02d}:{int((morning_end % 1) * 60):02d}",
+                    task_id=task['id'],
+                    task_title=task['title'],
+                    priority=task['priority'],
+                    complexity=task.get('complexity', 'medium')
+                ))
+                
+                # Lunch break
+                current_time = 13.0  # Resume at 1 PM
+                remaining_duration = duration - (morning_end - current_time)
+                
+                if remaining_duration > 0.25:  # If more than 15 minutes left
+                    slot_end = current_time + remaining_duration
+                    timetable.append(TimeSlot(
+                        start_time=f"{int(current_time):02d}:{int((current_time % 1) * 60):02d}",
+                        end_time=f"{int(slot_end):02d}:{int((slot_end % 1) * 60):02d}",
+                        task_id=task['id'],
+                        task_title=task['title'] + " (continued)",
+                        priority=task['priority'],
+                        complexity=task.get('complexity', 'medium')
+                    ))
+                    current_time = slot_end
+        else:
+            # Regular slot
+            timetable.append(TimeSlot(
+                start_time=f"{int(current_time):02d}:{int((current_time % 1) * 60):02d}",
+                end_time=f"{int(slot_end):02d}:{int((slot_end % 1) * 60):02d}",
+                task_id=task['id'],
+                task_title=task['title'],
+                priority=task['priority'],
+                complexity=task.get('complexity', 'medium')
+            ))
+            current_time = slot_end
+        
+        # Add small break between tasks (15 minutes)
+        current_time += 0.25
+        
+        if current_time >= end_time:
+            break
+    
+    return timetable
+
 def rule_based_estimation(title: str, description: str, deadline: str) -> Dict[str, Any]:
     """Fallback rule-based estimation"""
     
