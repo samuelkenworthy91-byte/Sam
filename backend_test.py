@@ -613,8 +613,14 @@ class WorkflowOrganizerTester:
         self.test_get_single_task()
         self.test_update_task()
         
-        # Advanced features
-        self.test_daily_recommendations()
+        # NEW: Bulk import feature tests
+        print("\n🔄 Testing NEW Bulk Import Feature:")
+        self.test_bulk_import_valid_format()
+        self.test_bulk_import_different_date_formats()
+        self.test_bulk_import_error_handling()
+        
+        # Advanced features (updated)
+        self.test_recommendations_with_timetable()  # Updated to test timetable field
         self.test_learning_analytics()
         
         # Schedule management
