@@ -220,28 +220,31 @@ function App() {
           <p className="text-gray-600">AI-powered personal productivity and scheduling system</p>
         </div>
 
-        {/* Navigation Tabs */}
-        <div className="flex justify-center mb-8">
-          <div className="bg-white rounded-xl p-2 shadow-lg">
-            {[
-              { id: 'dashboard', label: 'Dashboard', icon: '📊' },
-              { id: 'tasks', label: 'Tasks', icon: '📝' },
-              { id: 'schedule', label: 'Schedule', icon: '📅' },
-              { id: 'analytics', label: 'Analytics', icon: '📈' }
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 mr-2 ${
-                  activeTab === tab.id
-                    ? 'bg-blue-600 text-white shadow-md'
-                    : 'text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                <span className="mr-2">{tab.icon}</span>
-                {tab.label}
-              </button>
-            ))}
+        {/* Navigation Tabs - Mobile Responsive */}
+        <div className="flex justify-center mb-6 md:mb-8 px-2">
+          <div className="bg-white rounded-xl p-2 shadow-lg mobile-nav overflow-x-auto">
+            <div className="flex space-x-1 min-w-max">
+              {[
+                { id: 'dashboard', label: 'Dashboard', icon: '📊', shortLabel: 'Home' },
+                { id: 'tasks', label: 'Tasks', icon: '📝', shortLabel: 'Tasks' },
+                { id: 'schedule', label: 'Schedule', icon: '📅', shortLabel: 'Schedule' },
+                { id: 'analytics', label: 'Analytics', icon: '📈', shortLabel: 'Stats' }
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`px-4 md:px-6 py-3 rounded-lg font-medium transition-all duration-200 whitespace-nowrap ${
+                    activeTab === tab.id
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  <span className="mr-1 md:mr-2">{tab.icon}</span>
+                  <span className="hidden sm:inline">{tab.label}</span>
+                  <span className="sm:hidden">{tab.shortLabel}</span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
