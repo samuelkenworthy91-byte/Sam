@@ -176,6 +176,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ TESTED: Daily recommendations working correctly. GET /api/recommendations/daily generates intelligent task recommendations considering urgency, priority, and user learning patterns. Returns proper workload status (light/moderate/heavy/overloaded) and allocates time appropriately."
+      - working: true
+        agent: "testing"
+        comment: "✅ UPDATED & TESTED: Daily recommendations now include timetable field with time slots! Timetable array contains proper structure with start_time, end_time, task_id, task_title, priority, and complexity fields. Generated 5 time slots in test. Timetable generation works correctly with mixed task complexities from bulk imported tasks."
 
   - task: "Learning analytics system"
     implemented: true
