@@ -43,12 +43,12 @@ class WorkflowOrganizerTester:
     def test_health_check(self):
         """Test basic server health check"""
         try:
-            # The root URL serves frontend, so test the API root instead
-            response = self.session.get(f"{API_BASE}/", timeout=10)
+            # Test the tasks endpoint as a health check since root is served by frontend
+            response = self.session.get(f"{API_BASE}/tasks", timeout=10)
             if response.status_code == 200:
                 data = response.json()
-                if "message" in data and "running" in data["message"].lower():
-                    self.log_test("Health Check", True, f"API responding: {data['message']}")
+                if isinstance(data, list):
+                    self.log_test("Health Check", True, f"API responding: tasks endpoint returned {len(data)} tasks")
                     return True
                 else:
                     self.log_test("Health Check", False, f"Unexpected response format: {data}")
