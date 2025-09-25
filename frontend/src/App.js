@@ -250,54 +250,116 @@ function App() {
           <div className="space-y-8">
             {/* Daily Recommendations */}
             {recommendations && (
-              <div className="bg-white rounded-xl shadow-xl p-8">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold text-gray-800">Today's Recommendations</h2>
-                  <div className={`px-4 py-2 rounded-full font-medium ${getStatusBadgeColor(recommendations.workload_status)}`}>
-                    {recommendations.workload_status.charAt(0).toUpperCase() + recommendations.workload_status.slice(1)} Workload
+              <div className="space-y-8">
+                <div className="bg-white rounded-xl shadow-xl p-8">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold text-gray-800">Today's Recommendations</h2>
+                    <div className={`px-4 py-2 rounded-full font-medium ${getStatusBadgeColor(recommendations.workload_status)}`}>
+                      {recommendations.workload_status.charAt(0).toUpperCase() + recommendations.workload_status.slice(1)} Workload
+                    </div>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-6 mb-6">
+                    <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-6 text-white">
+                      <h3 className="text-lg font-semibold mb-2">Available Hours</h3>
+                      <div className="text-3xl font-bold">{recommendations.available_hours}h</div>
+                      <p className="text-blue-100">Daily capacity (8 AM - 4 PM)</p>
+                    </div>
+                    <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-lg p-6 text-white">
+                      <h3 className="text-lg font-semibold mb-2">Allocated Hours</h3>
+                      <div className="text-3xl font-bold">{recommendations.total_hours}h</div>
+                      <p className="text-indigo-100">
+                        {Math.round((recommendations.total_hours / recommendations.available_hours) * 100)}% utilization
+                      </p>
+                    </div>
                   </div>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-6 mb-6">
-                  <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-6 text-white">
-                    <h3 className="text-lg font-semibold mb-2">Available Hours</h3>
-                    <div className="text-3xl font-bold">{recommendations.available_hours}h</div>
-                    <p className="text-blue-100">Daily capacity (8 AM - 4 PM)</p>
-                  </div>
-                  <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-lg p-6 text-white">
-                    <h3 className="text-lg font-semibold mb-2">Allocated Hours</h3>
-                    <div className="text-3xl font-bold">{recommendations.total_hours}h</div>
-                    <p className="text-indigo-100">
-                      {Math.round((recommendations.total_hours / recommendations.available_hours) * 100)}% utilization
-                    </p>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <h3 className="text-xl font-semibold text-gray-800 mb-4">Recommended Tasks for Today</h3>
-                  {recommendations.tasks.length > 0 ? (
-                    recommendations.tasks.map(task => (
-                      <div key={task.id} className={`border-l-4 rounded-lg p-4 ${getPriorityColor(task.priority)}`}>
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-gray-800 mb-1">{task.title}</h4>
-                            <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-                              <span>⏰ {task.allocated_hours}h allocated</span>
-                              <span>📅 Due: {formatDate(task.deadline)}</span>
-                              <span>🎯 {task.priority} priority</span>
-                              <span>📊 {task.progress_percentage}% of total estimate</span>
+                {/* Daily Timetable */}
+                {recommendations.timetable && recommendations.timetable.length > 0 && (
+                  <div className="bg-white rounded-xl shadow-xl p-8">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-6">📅 Your Daily Timetable</h2>
+                    <div className="space-y-3">
+                      {recommendations.timetable.map((slot, index) => (
+                        <div key={index} className={`flex items-center p-4 rounded-lg border-l-4 ${getPriorityColor(slot.priority)}`}>
+                          <div className="flex-shrink-0 w-24 text-center">
+                            <div className="bg-gray-100 rounded px-2 py-1 text-sm font-mono">
+                              {slot.start_time}
+                            </div>
+                            <div className="text-xs text-gray-500 mt-1">to</div>
+                            <div className="bg-gray-100 rounded px-2 py-1 text-sm font-mono">
+                              {slot.end_time}
                             </div>
                           </div>
-                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            task.complexity === 'large' ? 'bg-red-100 text-red-700' :
-                            task.complexity === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                            'bg-green-100 text-green-700'
-                          }`}>
-                            {task.complexity}
-                          </span>
+                          
+                          <div className="ml-6 flex-1">
+                            <h4 className="font-semibold text-gray-800">{slot.task_title}</h4>
+                            <div className="flex gap-4 text-sm text-gray-600 mt-1">
+                              <span className={`px-2 py-1 rounded text-xs ${
+                                slot.priority === 'high' ? 'bg-red-100 text-red-700' :
+                                slot.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                                'bg-green-100 text-green-700'
+                              }`}>
+                                {slot.priority}
+                              </span>
+                              <span className={`px-2 py-1 rounded text-xs ${
+                                slot.complexity === 'large' ? 'bg-red-100 text-red-700' :
+                                slot.complexity === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                                'bg-green-100 text-green-700'
+                              }`}>
+                                {slot.complexity}
+                              </span>
+                            </div>
+                          </div>
+                          
+                          <div className="text-sm text-gray-500">
+                            {Math.round((new Date(`2000-01-01T${slot.end_time}:00`) - new Date(`2000-01-01T${slot.start_time}:00`)) / (1000 * 60 * 60) * 10) / 10}h
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Teaching Break Reminder */}
+                    <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="flex items-center">
+                        <span className="text-blue-600 mr-2">🏫</span>
+                        <div>
+                          <h4 className="font-medium text-blue-800">Teaching Break Reminder</h4>
+                          <p className="text-blue-600 text-sm">Lunch break (12:00-1:00 PM) and teaching commitments are automatically factored into your schedule.</p>
                         </div>
                       </div>
-                    ))
+                    </div>
+                  </div>
+                )}
+
+                {/* Task Overview */}
+                <div className="bg-white rounded-xl shadow-xl p-8">
+                  <h3 className="text-xl font-semibold text-gray-800 mb-4">Task Overview</h3>
+                  {recommendations.tasks.length > 0 ? (
+                    <div className="space-y-4">
+                      {recommendations.tasks.map(task => (
+                        <div key={task.id} className={`border-l-4 rounded-lg p-4 ${getPriorityColor(task.priority)}`}>
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-gray-800 mb-1">{task.title}</h4>
+                              <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                                <span>⏰ {task.allocated_hours}h allocated</span>
+                                <span>📅 Due: {formatDate(task.deadline)}</span>
+                                <span>🎯 {task.priority} priority</span>
+                                <span>📊 {task.progress_percentage}% of total estimate</span>
+                              </div>
+                            </div>
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                              task.complexity === 'large' ? 'bg-red-100 text-red-700' :
+                              task.complexity === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                              'bg-green-100 text-green-700'
+                            }`}>
+                              {task.complexity}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   ) : (
                     <div className="text-center py-8 text-gray-500">
                       <div className="text-4xl mb-4">✨</div>
