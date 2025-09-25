@@ -1,0 +1,27 @@
+{
+  "short_name": "Master Plan",
+  "name": "Kenworthy's Master Plan",
+  "description": "AI-powered personal productivity and scheduling system",
+  "icons": [
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiByeD0iMjQiIGZpbGw9InVybCgjZ3JhZGllbnQwX2xpbmVhcl8xXzEpIi8+CjxwYXRoIGQ9Ik00OCA3Mmg5NnYxNkg0OHoiIGZpbGw9IndoaXRlIiBvcGFjaXR5PSIwLjkiLz4KPHA+YXRoIGQ9Ik00OCA5Nmg3MnYxNkg0OHoiIGZpbGw9IndoaXRlIiBvcGFjaXR5PSIwLjciLz4KPHA+YXRoIGQ9Ik00OCAxMjBoOTZ2MTZINDE4eiIgZmlsbD0id2hpdGUiIG9wYWNpdHk9IjAuOSIvPgo8cGF0aCBkPSJNNzIgNDBIMTIwVjQ4SDcyeiIgZmlsbD0id2hpdGUiLz4KPHA+YXRoIGQ9Ik0xMzYgNTZIMTUyVjE0NEgxMzZ6IiBmaWxsPSJ3aGl0ZSIgb3BhY2l0eT0iMC44Ii8+CjxkZWZzPgo8bGluZWFyR3JhZGllbnQgaWQ9ImdyYWRpZW50MF9saW5lYXJfMV8xIiB4MT0iMCIgeTE9IjAiIHgyPSIxOTIiIHkyPSIxOTIiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KPHN0b3Agc3RvcC1jb2xvcj0iIzM5ODJGNiIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM2MzY2RjEiLz4KPC9saW5lYXJHcmFkaWVudD4KPC9kZWZzPgo8L3N2Zz4K",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iNjQiIGZpbGw9InVybCgjZ3JhZGllbnQwX2xpbmVhcl8xXzEpIi8+CjxwYXRoIGQ9Ik0xMjggMTkyaDI1NnY0MkgxMjh6IiBmaWxsPSJ3aGl0ZSIgb3BhY2l0eT0iMC45Ii8+CjxwYXRoIGQ9Ik0xMjggMjU2aDE5MnY0MkgxMjh6IiBmaWxsPSJ3aGl0ZSIgb3BhY2l0eT0iMC43Ii8+CjxwYXRoIGQ9Ik0xMjggMzIwaDI1NnY0MkgxMjh6IiBmaWxsPSJ3aGl0ZSIgb3BhY2l0eT0iMC45Ii8+CjxwYXRoIGQ9Ik0xOTIgMTA2aDMyMHY0OEgxOTJ6IiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNMzY4IDE0OGg0MHYyNDBIMzY4eiIgZmlsbD0id2hpdGUiIG9wYWNpdHk9IjAuOCIvPgo8ZGVmcz4KPGxpbmVhckdyYWRpZW50IGlkPSJncmFkaWVudDBfbGluZWFyXzFfMSIgeDE9IjAiIHkxPSIwIiB4Mj0iNTEyIiB5Mj0iNTEyIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CjxzdG9wIHN0b3AtY29sb3I9IiMzOTgyRjYiLz4KPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjNjM2NkYxIi8+CjwvbGluZWFyR3JhZGllbnQ+CjwvZGVmcz4KPC9zdmc+Cg==",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#3982F6",
+  "background_color": "#F3F4F6",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "categories": ["productivity", "business", "education"],
+  "lang": "en-US"
+}
