@@ -270,10 +270,14 @@ def prepare_for_mongo(data):
 
 def parse_from_mongo(item):
     """Parse data from MongoDB"""
+    from bson import ObjectId
     if isinstance(item, dict):
-        return {k: parse_from_mongo(v) for k, v in item.items()}
+        # Remove MongoDB's _id field to avoid ObjectId serialization issues
+        return {k: parse_from_mongo(v) for k, v in item.items() if k != '_id'}
     elif isinstance(item, list):
         return [parse_from_mongo(i) for i in item]
+    elif isinstance(item, ObjectId):
+        return str(item)
     return item
 
 # API Routes
