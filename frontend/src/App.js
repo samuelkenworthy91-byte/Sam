@@ -278,26 +278,26 @@ function App() {
                   </div>
                 </div>
 
-                {/* Daily Timetable */}
+                {/* Daily Timetable - Mobile Responsive */}
                 {recommendations.timetable && recommendations.timetable.length > 0 && (
-                  <div className="bg-white rounded-xl shadow-xl p-8">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-6">📅 Your Daily Timetable</h2>
+                  <div className="bg-white rounded-xl shadow-xl p-4 md:p-8">
+                    <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-4 md:mb-6">📅 Your Daily Timetable</h2>
                     <div className="space-y-3">
                       {recommendations.timetable.map((slot, index) => (
-                        <div key={index} className={`flex items-center p-4 rounded-lg border-l-4 ${getPriorityColor(slot.priority)}`}>
-                          <div className="flex-shrink-0 w-24 text-center">
-                            <div className="bg-gray-100 rounded px-2 py-1 text-sm font-mono">
+                        <div key={index} className={`flex items-center p-3 md:p-4 rounded-lg border-l-4 ${getPriorityColor(slot.priority)}`}>
+                          <div className="flex-shrink-0 w-16 md:w-24 text-center">
+                            <div className="bg-gray-100 rounded px-1 md:px-2 py-1 text-xs md:text-sm font-mono">
                               {slot.start_time}
                             </div>
                             <div className="text-xs text-gray-500 mt-1">to</div>
-                            <div className="bg-gray-100 rounded px-2 py-1 text-sm font-mono">
+                            <div className="bg-gray-100 rounded px-1 md:px-2 py-1 text-xs md:text-sm font-mono">
                               {slot.end_time}
                             </div>
                           </div>
                           
-                          <div className="ml-6 flex-1">
-                            <h4 className="font-semibold text-gray-800">{slot.task_title}</h4>
-                            <div className="flex gap-4 text-sm text-gray-600 mt-1">
+                          <div className="ml-3 md:ml-6 flex-1 min-w-0">
+                            <h4 className="font-semibold text-gray-800 text-sm md:text-base truncate">{slot.task_title}</h4>
+                            <div className="flex flex-wrap gap-2 text-sm text-gray-600 mt-1">
                               <span className={`px-2 py-1 rounded text-xs ${
                                 slot.priority === 'high' ? 'bg-red-100 text-red-700' :
                                 slot.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
@@ -315,7 +315,7 @@ function App() {
                             </div>
                           </div>
                           
-                          <div className="text-sm text-gray-500">
+                          <div className="text-xs md:text-sm text-gray-500 flex-shrink-0">
                             {Math.round((new Date(`2000-01-01T${slot.end_time}:00`) - new Date(`2000-01-01T${slot.start_time}:00`)) / (1000 * 60 * 60) * 10) / 10}h
                           </div>
                         </div>
