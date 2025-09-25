@@ -214,10 +214,10 @@ function App() {
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">
             <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Workflow Organizer
+              Kenworthy's Master Plan
             </span>
           </h1>
-          <p className="text-gray-600">AI-powered task management and learning system</p>
+          <p className="text-gray-600">AI-powered personal productivity and scheduling system</p>
         </div>
 
         {/* Navigation Tabs */}
