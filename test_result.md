@@ -120,6 +120,18 @@ backend:
         agent: "testing"
         comment: "✅ TESTED: FastAPI server running correctly with MongoDB integration. All API endpoints responding properly. Fixed ObjectId serialization issue in learning analytics."
 
+  - task: "Bulk task import feature"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTED: NEW bulk import feature working excellently! POST /api/tasks/bulk-import successfully handles multiple date formats (25 Sep 2025, Sep 30 2025, 01/10/2025, 2025-10-05). AI analysis applied to all imported tasks. Proper date parsing to ISO format. Test Case 1: 4/4 tasks created with AI analysis. Test Case 2: 3/3 tasks with different date formats parsed correctly. Minor: Error handling returns 500 instead of 400 for empty input, but correctly rejects invalid data."
+
   - task: "LLM integration for AI task analysis"
     implemented: true
     working: true
