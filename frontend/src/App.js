@@ -375,9 +375,61 @@ function App() {
         {/* Tasks Tab */}
         {activeTab === 'tasks' && (
           <div className="space-y-8">
-            {/* Add Task Form */}
+            {/* Bulk Import Tasks */}
             <div className="bg-white rounded-xl shadow-xl p-8">
-              <h2 className="text-2xl font-bold text-gray-800 mb-6">Add New Task</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-6">📋 Bulk Import Tasks</h2>
+              <p className="text-gray-600 mb-4">
+                Copy and paste your task list in the format: <strong>"Task Name — Date"</strong>
+              </p>
+              
+              <div className="bg-gray-50 p-4 rounded-lg mb-4 border-l-4 border-blue-400">
+                <p className="text-sm text-gray-700 mb-2"><strong>Example format:</strong></p>
+                <code className="text-sm text-gray-600">
+                  Opening Evening — 25 Sep 2025<br/>
+                  Open Morning — 24 Sep 2025<br/>
+                  INSET Day — 26 Sep 2025
+                </code>
+              </div>
+
+              <form onSubmit={bulkImportTasks} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Task List</label>
+                  <textarea
+                    required
+                    value={bulkTaskText}
+                    onChange={(e) => setBulkTaskText(e.target.value)}
+                    rows={6}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Opening Evening — 25 Sep 2025&#10;Open Morning — 24 Sep 2025&#10;INSET Day — 26 Sep 2025"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Default Priority</label>
+                  <select
+                    value={bulkPriority}
+                    onChange={(e) => setBulkPriority(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="low">Low Priority</option>
+                    <option value="medium">Medium Priority</option>
+                    <option value="high">High Priority</option>
+                  </select>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-3 rounded-lg font-semibold hover:from-green-700 hover:to-green-800 transition-all duration-200 disabled:opacity-50"
+                >
+                  {loading ? 'Importing Tasks...' : '🚀 Import Tasks with AI Analysis'}
+                </button>
+              </form>
+            </div>
+
+            {/* Add Individual Task Form */}
+            <div className="bg-white rounded-xl shadow-xl p-8">
+              <h2 className="text-2xl font-bold text-gray-800 mb-6">Add Individual Task</h2>
               <form onSubmit={createTask} className="space-y-4">
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
