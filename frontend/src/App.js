@@ -18,6 +18,9 @@ function App() {
     priority: 'medium'
   });
 
+  const [bulkTaskText, setBulkTaskText] = useState('');
+  const [bulkPriority, setBulkPriority] = useState('medium');
+
   const [teachingSchedule, setTeachingSchedule] = useState([
     { day: 'monday', start_time: '', end_time: '', description: '' }
   ]);
