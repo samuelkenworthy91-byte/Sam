@@ -57,6 +57,18 @@ class TaskUpdate(BaseModel):
     actual_hours: Optional[float] = None
     status: Optional[str] = None
 
+class BulkTaskImport(BaseModel):
+    task_text: str
+    default_priority: str = "medium"
+
+class TimeSlot(BaseModel):
+    start_time: str  # "09:00"
+    end_time: str    # "10:30"
+    task_id: str
+    task_title: str
+    priority: str
+    complexity: str
+
 class Schedule(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     day_of_week: str  # monday, tuesday, etc.
