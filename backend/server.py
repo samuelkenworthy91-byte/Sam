@@ -487,6 +487,50 @@ def parse_from_mongo(item):
 async def root():
     return {"message": "Workflow Organizer API is running!"}
 
+@app.post("/api/tasks/bulk-import")
+async def bulk_import_tasks(bulk_import: BulkTaskImport):
+    try:
+        # Parse the bulk task text
+        parsed_tasks = parse_bulk_tasks(bulk_import.task_text, bulk_import.default_priority)
+        
+        if not parsed_tasks:
+            raise HTTPException(status_code=400, detail="No valid tasks found in the input")
+        
+        created_tasks = []
+        
+        for task_data in parsed_tasks:
+            # Get AI analysis for each task
+            ai_analysis = await get_ai_task_analysis(task_data['title'], task_data['description'], task_data['deadline'])
+            
+            # Create task with AI insights
+            task = Task(
+                title=task_data['title'],
+                description=task_data['description'],
+                deadline=task_data['deadline'],
+                priority=task_data['priority'],
+                complexity=ai_analysis.get('complexity', task_data['complexity']),
+                estimated_hours=ai_analysis.get('estimated_hours', 2.0),
+                tags=ai_analysis.get('suggested_tags', []),
+                ai_analysis=ai_analysis.get('breakdown', '')
+            )
+            
+            # Prepare for database
+            task_data_prepared = prepare_for_mongo(task.dict())
+            
+            # Insert into database
+            result = await db.tasks.insert_one(task_data_prepared)
+            if result.inserted_id:
+                created_tasks.append(task.dict())
+        
+        return {
+            "message": f"Successfully created {len(created_tasks)} tasks",
+            "tasks_created": len(created_tasks),
+            "tasks": created_tasks
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error importing tasks: {str(e)}")
+
 @app.post("/api/tasks", response_model=Task)
 async def create_task(task: Task):
     try:
