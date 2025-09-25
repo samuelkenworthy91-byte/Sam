@@ -589,13 +589,14 @@ async def get_daily_recommendations():
         tasks = await db.tasks.find({"status": {"$in": ["pending", "in_progress"]}}).to_list(length=None)
         
         if not tasks:
-            return DailyRecommendation(
-                date=datetime.now().date().isoformat(),
-                tasks=[],
-                total_hours=0,
-                available_hours=8,
-                workload_status="light"
-            )
+            return {
+                "date": datetime.now().date().isoformat(),
+                "tasks": [],
+                "total_hours": 0,
+                "available_hours": 6,
+                "workload_status": "light",
+                "timetable": []
+            }
         
         # Get user's learning insights
         learning_data = await db.learning_data.find().to_list(length=None)
@@ -663,6 +664,9 @@ async def get_daily_recommendations():
                 
                 total_allocated += allocated_time
         
+        # Generate daily timetable
+        timetable_slots = generate_daily_timetable(recommended_tasks, available_hours)
+        
         # Determine workload status
         if total_allocated <= 3:
             workload_status = "light"
@@ -673,13 +677,14 @@ async def get_daily_recommendations():
         else:
             workload_status = "overloaded"
         
-        return DailyRecommendation(
-            date=datetime.now().date().isoformat(),
-            tasks=recommended_tasks,
-            total_hours=round(total_allocated, 1),
-            available_hours=available_hours,
-            workload_status=workload_status
-        )
+        return {
+            "date": datetime.now().date().isoformat(),
+            "tasks": recommended_tasks,
+            "total_hours": round(total_allocated, 1),
+            "available_hours": available_hours,
+            "workload_status": workload_status,
+            "timetable": [slot.dict() for slot in timetable_slots]
+        }
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating recommendations: {str(e)}")
