@@ -395,6 +395,182 @@ class WorkflowOrganizerTester:
             self.log_test("Learning Analytics", False, f"Error: {str(e)}")
             return False
 
+    def test_bulk_import_valid_format(self):
+        """Test bulk task import with valid copy-paste format"""
+        try:
+            bulk_data = {
+                "task_text": "Opening Evening — 25 Sep 2025\nOpen Morning — 24 Sep 2025\nINSET Day — 26 Sep 2025\nGrade Midterm Examinations — 27 Sep 2025",
+                "default_priority": "medium"
+            }
+            
+            response = self.session.post(f"{API_BASE}/tasks/bulk-import", json=bulk_data, timeout=30)
+            
+            if response.status_code == 200:
+                data = response.json()
+                required_fields = ["message", "tasks_created", "tasks"]
+                
+                missing_fields = [field for field in required_fields if field not in data]
+                if missing_fields:
+                    self.log_test("Bulk Import Valid Format", False, f"Missing fields: {missing_fields}", data)
+                    return False
+                
+                # Verify correct number of tasks created
+                if data["tasks_created"] == 4 and len(data["tasks"]) == 4:
+                    # Store created task IDs for cleanup
+                    for task in data["tasks"]:
+                        self.created_task_ids.append(task["id"])
+                    
+                    # Verify AI analysis was applied to each task
+                    ai_analyzed_count = sum(1 for task in data["tasks"] if task.get("ai_analysis") and task.get("estimated_hours", 0) > 0)
+                    
+                    if ai_analyzed_count == 4:
+                        self.log_test("Bulk Import Valid Format", True, 
+                                    f"Successfully imported {data['tasks_created']} tasks with AI analysis. "
+                                    f"Sample task: '{data['tasks'][0]['title']}' - {data['tasks'][0]['estimated_hours']}h")
+                        return True
+                    else:
+                        self.log_test("Bulk Import Valid Format", False, 
+                                    f"AI analysis missing for some tasks. Only {ai_analyzed_count}/4 tasks have AI analysis")
+                        return False
+                else:
+                    self.log_test("Bulk Import Valid Format", False, 
+                                f"Expected 4 tasks, got {data['tasks_created']} created and {len(data['tasks'])} returned")
+                    return False
+            else:
+                self.log_test("Bulk Import Valid Format", False, f"HTTP {response.status_code}: {response.text}")
+                return False
+                
+        except Exception as e:
+            self.log_test("Bulk Import Valid Format", False, f"Error: {str(e)}")
+            return False
+
+    def test_bulk_import_different_date_formats(self):
+        """Test bulk import with different date formats"""
+        try:
+            bulk_data = {
+                "task_text": "Staff Meeting — Sep 30 2025\nParent Conference — 01/10/2025\nLecture Prep — 2025-10-05",
+                "default_priority": "high"
+            }
+            
+            response = self.session.post(f"{API_BASE}/tasks/bulk-import", json=bulk_data, timeout=30)
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                if data["tasks_created"] == 3 and len(data["tasks"]) == 3:
+                    # Store created task IDs for cleanup
+                    for task in data["tasks"]:
+                        self.created_task_ids.append(task["id"])
+                    
+                    # Verify all tasks have proper ISO format deadlines
+                    valid_dates = 0
+                    for task in data["tasks"]:
+                        try:
+                            # Try to parse the deadline as ISO format
+                            datetime.fromisoformat(task["deadline"].replace('Z', '+00:00'))
+                            valid_dates += 1
+                        except:
+                            pass
+                    
+                    if valid_dates == 3:
+                        # Verify priority was set correctly
+                        high_priority_count = sum(1 for task in data["tasks"] if task.get("priority") == "high")
+                        
+                        if high_priority_count == 3:
+                            self.log_test("Bulk Import Different Date Formats", True, 
+                                        f"Successfully parsed 3 different date formats with high priority. "
+                                        f"Sample deadlines: {[task['deadline'][:10] for task in data['tasks']]}")
+                            return True
+                        else:
+                            self.log_test("Bulk Import Different Date Formats", False, 
+                                        f"Priority not set correctly. Expected 3 high priority, got {high_priority_count}")
+                            return False
+                    else:
+                        self.log_test("Bulk Import Different Date Formats", False, 
+                                    f"Date parsing failed. Only {valid_dates}/3 tasks have valid ISO dates")
+                        return False
+                else:
+                    self.log_test("Bulk Import Different Date Formats", False, 
+                                f"Expected 3 tasks, got {data['tasks_created']} created")
+                    return False
+            else:
+                self.log_test("Bulk Import Different Date Formats", False, f"HTTP {response.status_code}: {response.text}")
+                return False
+                
+        except Exception as e:
+            self.log_test("Bulk Import Different Date Formats", False, f"Error: {str(e)}")
+            return False
+
+    def test_bulk_import_error_handling(self):
+        """Test bulk import error handling for invalid formats"""
+        try:
+            # Test with empty task text
+            bulk_data = {
+                "task_text": "",
+                "default_priority": "medium"
+            }
+            
+            response = self.session.post(f"{API_BASE}/tasks/bulk-import", json=bulk_data, timeout=10)
+            
+            if response.status_code == 400:
+                self.log_test("Bulk Import Error Handling", True, "Correctly rejected empty task text with 400 error")
+                return True
+            else:
+                self.log_test("Bulk Import Error Handling", False, 
+                            f"Expected 400 error for empty input, got {response.status_code}: {response.text}")
+                return False
+                
+        except Exception as e:
+            self.log_test("Bulk Import Error Handling", False, f"Error: {str(e)}")
+            return False
+
+    def test_recommendations_with_timetable(self):
+        """Test that daily recommendations now include timetable field"""
+        try:
+            response = self.session.get(f"{API_BASE}/recommendations/daily", timeout=15)
+            
+            if response.status_code == 200:
+                data = response.json()
+                required_fields = ["date", "tasks", "total_hours", "available_hours", "workload_status", "timetable"]
+                
+                missing_fields = [field for field in required_fields if field not in data]
+                if missing_fields:
+                    self.log_test("Recommendations with Timetable", False, f"Missing fields: {missing_fields}", data)
+                    return False
+                
+                # Verify timetable structure
+                if isinstance(data["timetable"], list):
+                    if len(data["timetable"]) > 0:
+                        # Check first timetable slot structure
+                        slot = data["timetable"][0]
+                        required_slot_fields = ["start_time", "end_time", "task_id", "task_title", "priority", "complexity"]
+                        
+                        missing_slot_fields = [field for field in required_slot_fields if field not in slot]
+                        if missing_slot_fields:
+                            self.log_test("Recommendations with Timetable", False, 
+                                        f"Missing timetable slot fields: {missing_slot_fields}", slot)
+                            return False
+                        
+                        self.log_test("Recommendations with Timetable", True, 
+                                    f"Timetable generated with {len(data['timetable'])} time slots. "
+                                    f"Sample slot: {slot['start_time']}-{slot['end_time']} - {slot['task_title']}")
+                        return True
+                    else:
+                        self.log_test("Recommendations with Timetable", True, 
+                                    "Timetable field present but empty (no tasks to schedule)")
+                        return True
+                else:
+                    self.log_test("Recommendations with Timetable", False, 
+                                f"Timetable should be a list, got: {type(data['timetable'])}")
+                    return False
+            else:
+                self.log_test("Recommendations with Timetable", False, f"HTTP {response.status_code}: {response.text}")
+                return False
+                
+        except Exception as e:
+            self.log_test("Recommendations with Timetable", False, f"Error: {str(e)}")
+            return False
+
     def test_delete_task(self):
         """Test deleting a task"""
         if not self.created_task_ids:
