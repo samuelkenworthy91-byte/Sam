@@ -502,7 +502,8 @@ async def create_schedule_item(schedule: Schedule):
 @app.get("/api/analytics/learning")
 async def get_learning_analytics():
     try:
-        learning_data = await db.learning_data.find().to_list(length=None)
+        learning_data_raw = await db.learning_data.find().to_list(length=None)
+        learning_data = [parse_from_mongo(item) for item in learning_data_raw]
         insights = calculate_learning_insights(learning_data)
         
         # Calculate additional analytics
@@ -513,7 +514,7 @@ async def get_learning_analytics():
             "overall_pace_factor": round(insights['pace_factor'], 2),
             "complexity_insights": {k: round(v, 2) for k, v in insights['complexity_adjustments'].items()},
             "tag_performance": {k: round(v, 2) for k, v in insights['tag_insights'].items()},
-            "recent_completions": recent_tasks[:5],
+            "recent_completions": [parse_from_mongo(task) for task in recent_tasks[:5]],
             "accuracy_trend": [
                 {
                     "task_title": task.get('notes', 'Unknown'),
