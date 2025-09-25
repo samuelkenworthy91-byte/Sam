@@ -177,15 +177,124 @@
   @apply transform hover:scale-105 transition-all duration-200;
 }
 
-/* Mobile responsiveness */
+/* Mobile responsiveness - Enhanced for Google Pixel */
 @media (max-width: 768px) {
   .container {
-    padding-left: 1rem;
-    padding-right: 1rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
   }
   
   .grid-responsive {
     grid-template-columns: 1fr;
+  }
+
+  /* Mobile-optimized text sizes */
+  h1 {
+    font-size: 2rem;
+    line-height: 2.5rem;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+
+  /* Touch-friendly buttons */
+  button {
+    min-height: 44px;
+    padding: 12px 20px;
+  }
+
+  /* Better mobile form inputs */
+  input, textarea, select {
+    font-size: 16px; /* Prevents zoom on iOS */
+    min-height: 44px;
+  }
+
+  /* Mobile navigation tabs */
+  .mobile-nav {
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .mobile-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Optimized card spacing on mobile */
+  .space-y-8 > * + * {
+    margin-top: 1.5rem;
+  }
+
+  .space-y-4 > * + * {
+    margin-top: 1rem;
+  }
+
+  /* Better timetable on mobile */
+  .timetable-mobile {
+    font-size: 0.875rem;
+  }
+
+  /* Responsive padding for mobile */
+  .p-8 {
+    padding: 1rem;
+  }
+
+  .p-6 {
+    padding: 0.75rem;
+  }
+}
+
+/* Extra small screens (phones in portrait) */
+@media (max-width: 480px) {
+  .container {
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+  }
+
+  /* Very compact spacing for small screens */
+  .space-y-8 > * + * {
+    margin-top: 1rem;
+  }
+
+  /* Smaller buttons on very small screens but still touch-friendly */
+  button {
+    padding: 10px 16px;
+    font-size: 0.875rem;
+  }
+
+  /* Compact form layout */
+  .grid.md\\:grid-cols-2 {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+}
+
+/* PWA specific styles */
+@media (display-mode: standalone) {
+  /* Hide the Emergent badge when in PWA mode */
+  #emergent-badge {
+    display: none !important;
+  }
+
+  /* Add safe area padding for notched devices */
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  /* Full screen app styling */
+  .min-h-screen {
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
   }
 }
 
