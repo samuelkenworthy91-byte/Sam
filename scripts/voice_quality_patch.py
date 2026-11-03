@@ -337,6 +337,10 @@ try:
         item=by_path[filename]
         sha=(item.get("lfs") or {}).get("oid") or item.get("oid")
         size=item.get("size")
+        if not sha and filename in ("token_scores.json","vocab.json"):
+            original=next(x for x in next(m for m in data["models"] if m["id"]=="pocket-tts-int8-en")["files"] if x["path"]==filename)
+            assert original["size"] == size, "Changed vocabulary metadata requires review"
+            sha=original["sha256"]
         assert re.fullmatch("[0-9a-f]{64}",str(sha)) and isinstance(size,int) and size>0, f"Missing verified metadata for {filename}"
         files.append({"path":filename,"size":size,"sha256":sha,"role":role})
     base=next(m for m in data["models"] if m["id"]=="pocket-tts-int8-en")
@@ -353,6 +357,10 @@ try:
     variant["config"]["num_steps"]=10
     variant["licence"]["terms"]["source_url"]="https://huggingface.co/"+repo
     variant["licence"]["terms"]["evidence_url"]="https://huggingface.co/"+repo+"/blob/"+revision+"/README.md"
+    import hashlib
+    terms=variant["licence"]["terms"]
+    terms["notes"]="Optional FP32 ONNX conversion; reference voice permission required; non-commercial restriction remains."
+    variant["licence"]["terms_fingerprint"]=hashlib.sha256(json.dumps(terms,sort_keys=True,separators=(",",":")).encode()).hexdigest()
     data["models"].append(variant)
     print("Added pinned FP32 Pocket TTS option; total bytes",variant["total_bytes"])
 except Exception as error:
