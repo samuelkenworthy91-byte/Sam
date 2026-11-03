@@ -290,6 +290,10 @@ patch(phone_studio,
 
 speak = feature_base + "speak/SpeakScreen.kt"
 patch(speak,
+'''import androidx.compose.ui.Modifier''',
+'''import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp''')
+patch(speak,
 '''            var language by rememberSaveable {mutableStateOf("en")}''',
 '''            var language by rememberSaveable {mutableStateOf("en")}
             var qualitySteps by rememberSaveable {mutableIntStateOf(10)}''')
