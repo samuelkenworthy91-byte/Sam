@@ -348,7 +348,7 @@ try:
         item=by_path[filename]
         sha=(item.get("lfs") or {}).get("oid") or item.get("oid")
         size=item.get("size")
-        if not sha and filename in ("token_scores.json","vocab.json"):
+        if not re.fullmatch("[0-9a-f]{64}",str(sha)) and filename in ("token_scores.json","vocab.json"):
             original=next(x for x in next(m for m in data["models"] if m["id"]=="pocket-tts-int8-en")["files"] if x["path"]==filename)
             assert original["size"] == size, "Changed vocabulary metadata requires review"
             sha=original["sha256"]
