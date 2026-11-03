@@ -22,6 +22,14 @@ jobs:
           path: voicestudio
           persist-credentials: false
 
+      - name: Checkout quality lab patches
+        uses: actions/checkout@v4
+        with:
+          repository: samuelkenworthy91-byte/Sam
+          ref: voicestudio-pockettts-android-preview
+          path: build-config
+          persist-credentials: false
+
       - name: Prepare a separate, independently installable preview app
         working-directory: voicestudio
         run: |
@@ -31,15 +39,18 @@ jobs:
           text = build.read_text()
           old = 'applicationId = "sh.voicestudio.mobile"'
           assert text.count(old) == 1, "Unexpected upstream Android package ID"
-          build.write_text(text.replace(old, 'applicationId = "sh.voicestudio.mobile.pocketpreview"'))
+          build.write_text(text.replace(old, 'applicationId = "sh.voicestudio.mobile.pocketpreview.quality"'))
           manifest = Path("mobile/android/app/src/main/AndroidManifest.xml")
           text = manifest.read_text()
           old = 'android:label="@string/app_name"'
           assert text.count(old) == 1, "Unexpected upstream app label"
-          manifest.write_text(text.replace(old, 'android:label="VoiceStudio Pocket Preview"'))
+          manifest.write_text(text.replace(old, 'android:label="VoiceStudio Quality Lab"'))
           catalog = Path("mobile/contract/models.json").read_text().lower()
           assert "pocket" in catalog, "Pocket TTS absent from model catalogue"
           PY
+
+      - name: Apply 90-second smart capture and quality controls
+        run: python3 build-config/scripts/voice_quality_patch.py voicestudio
 
       - name: Java 21
         uses: actions/setup-java@v4
@@ -58,7 +69,7 @@ jobs:
 
       - name: Build debug-signed Android APK
         working-directory: voicestudio/mobile/android
-        run: ./gradlew --no-daemon :app:assembleDebug
+        run: ./gradlew --no-daemon :app:assembleDebug :core:local:testDebugUnitTest
 
       - name: Verify package identity, signature, and checksum
         run: |
@@ -66,15 +77,30 @@ jobs:
           APK="voicestudio/mobile/android/app/build/outputs/apk/debug/app-debug.apk"
           test -s "$APK"
           "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify "$APK"
-          "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging "$APK" | grep "^package: name='sh.voicestudio.mobile.pocketpreview'"
+          "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging "$APK" | grep "^package: name='sh.voicestudio.mobile.pocketpreview.quality'"
           mkdir -p out
-          cp "$APK" out/VoiceStudio-PocketTTS-Preview.apk
-          (cd out && sha256sum VoiceStudio-PocketTTS-Preview.apk > SHA256SUMS.txt)
+          cp "$APK" out/VoiceStudio-QualityLab.apk
+          cat > out/README.txt <<'EOF'
+          VoiceStudio Quality Lab (experimental Android build)
+          Supports: up to 90-second source recordings, smart 12-second reference selection,
+          gentle cleanup, three alternate saved clones for A/B listening,
+          adjustable Pocket synthesis steps, ZipVoice comparison,
+          a rough pitch proximity metric (NOT speaker identity verification).
+          Full-precision Pocket model appears only if its pinned checksums were
+          available and verified during the build.
+          Android application ID: sh.voicestudio.mobile.pocketpreview.quality
+          Separate installation: your existing VoiceStudio and Pocket Preview are untouched.
+          Note: independently signed debug builds cannot update over an earlier
+          independently signed build, and saved voices do not automatically migrate.
+          Voice data stays on the phone, no cloud voice upload is involved.
+          EOF
+          cp build-config/scripts/voice_quality_patch.py out/voice_quality_patch.py
+          (cd out && sha256sum VoiceStudio-QualityLab.apk > SHA256SUMS.txt)
 
       - name: Upload installable APK
         uses: actions/upload-artifact@v4
         with:
-          name: VoiceStudio-PocketTTS-Preview-Android
+          name: VoiceStudio-QualityLab-Android
           path: out/
           if-no-files-found: error
           retention-days: 14
