@@ -315,6 +315,13 @@ patch(speak,
                 }
                 com.voicestudio.mobile.features.models.ModelRamWarning(vm,listOfNotNull(selected))''')
 
+# Keep the existing regression test aligned with 90-second source import.
+voice_tests = "mobile/android/core/local/src/test/kotlin/com/voicestudio/mobile/local/PhoneVoicesTest.kt"
+patch(voice_tests, "assertEquals(30,maxSeconds)", "assertEquals(90,maxSeconds)")
+patch(voice_tests,
+'''store.create(" My voice ",File("unused"),true,fixtureModel(),fixtureModel("clone"),FakeLocalEngine(),decoder)''',
+'''store.create(" My voice ",File("unused"),true,fixtureModel(),fixtureModel("clone"),FakeLocalEngine(),decoder,cleanup=false)''')
+
 # The catalogue already offers ZipVoice, which is a meaningful alternative model.
 # Add an OPTIONAL full-precision Pocket model with revision and exact file hashes from Hugging Face.
 # If the hub is unavailable, leave the tested INT8 engine operational instead of publishing guesses.
